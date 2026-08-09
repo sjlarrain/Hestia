@@ -1,0 +1,64 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: var(--font-hanken), system-ui, sans-serif;
+  color: #23211c;
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: var(--accent, #b85c38);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--accent-deep, #93472a);
+}
+input,
+button,
+textarea,
+select {
+  font-family: inherit;
+}
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent, #b85c38) !important;
+}
+::placeholder {
+  color: #b4ad9e;
+}
+.cc-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+@keyframes casaFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes casaUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes casaSheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Hanken Grotesk', system-ui, sans-serif; color: #23211C; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent, #B85C38); text-decoration: none; }
+  a:hover { color: var(--accent-deep, #93472A); }
+  input, button, textarea, select { font-family: inherit; }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent, #B85C38) !important; }
+  ::placeholder { color: #B4AD9E; }
+  .cc-scroll::-webkit-scrollbar { width: 0; height: 0; }
+  @keyframes casaFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes casaUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes casaSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+</style>
+</helmet>
+
+<div style="min-height:100dvh;--accent:{{ accentColor }};background:#E7DECF;display:flex;justify-content:center;align-items:stretch;font-family:'Hanken Grotesk',sans-serif;">
+  <div style="width:100%;max-width:440px;height:100dvh;background:#F6F2EA;display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 0 80px rgba(60,40,20,.18);">
+
+    <!-- HEADER -->
+    <header style="flex:none;padding:18px 20px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EBE3D5;background:#F6F2EA;">
+      <div style="display:flex;flex-direction:column;line-height:1;">
+        <span style="font-family:'Instrument Serif',serif;font-size:27px;letter-spacing:.3px;color:#23211C;">Casa</span>
+        <span style="font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:#A79E8C;margin-top:3px;">Los Angeles</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onClick="{{ openInbox }}" style="position:relative;width:38px;height:38px;border-radius:50%;border:1px solid #E4DCCC;background:#FFFDF8;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6B6459" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <span style="{{ inboxDotStyle }}"></span>
+        </button>
+        <div style="display:flex;background:#EDE6D8;border-radius:999px;padding:3px;gap:2px;">
+          <button onClick="{{ setGuest }}" style="{{ guestPillStyle }}">Guest</button>
+          <button onClick="{{ setHost }}" style="{{ hostPillStyle }}">Host</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="cc-scroll" style="flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 20px 108px;">
+
+      <!-- GUEST · CALENDAR -->
+      <sc-if value="{{ showGuestCal }}" hint-placeholder-val="{{ true }}">
+      <div style="animation:casaFade .3s ease;">
+        <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;line-height:1.1;margin:2px 0 4px;">When would you like to stay?</h1>
+        <p style="margin:0 0 20px;color:#7C7568;font-size:14px;line-height:1.5;">Pick your arrival and departure. Grey dates are unavailable.</p>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <button onClick="{{ prevMonth }}" style="width:36px;height:36px;border-radius:50%;border:1px solid #E4DCCC;background:#FFFDF8;cursor:pointer;color:#6B6459;font-size:18px;line-height:1;">‹</button>
+          <span style="font-family:'Instrument Serif',serif;font-size:21px;">{{ monthLabel }}</span>
+          <button onClick="{{ nextMonth }}" style="width:36px;height:36px;border-radius:50%;border:1px solid #E4DCCC;background:#FFFDF8;cursor:pointer;color:#6B6459;font-size:18px;line-height:1;">›</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px;">
+          <sc-for list="{{ weekdays }}" as="w" hint-placeholder-count="7">
+            <span style="text-align:center;font-size:11px;letter-spacing:.5px;color:#B0A794;text-transform:uppercase;">{{ w }}</span>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
+          <sc-for list="{{ calCells }}" as="cell" hint-placeholder-count="35">
+            <div style="{{ cell.style }}" onClick="{{ cell.onClick }}">
+              <span>{{ cell.label }}</span>
+              <span style="{{ cell.dotStyle }}"></span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:18px;font-size:12px;color:#7C7568;">
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#4E7A52;"></span>Booked</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#C98A2B;"></span>Pending</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:2px;background:#DED6C6;"></span>Blocked</span>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- GUEST · MY TRIPS -->
+      <sc-if value="{{ showGuestTrips }}" hint-placeholder-val="{{ true }}">
+      <div style="animation:casaFade .3s ease;">
+        <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;line-height:1.1;margin:2px 0 18px;">My requests</h1>
+        <sc-if value="{{ hasMyTrips }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <sc-for list="{{ myTrips }}" as="t" hint-placeholder-count="2">
+              <div style="background:#FFFDF8;border:1px solid #EBE3D5;border-radius:16px;padding:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                  <div>
+                    <div style="font-family:'Instrument Serif',serif;font-size:20px;line-height:1.1;">{{ t.range }}</div>
+                    <div style="font-size:13px;color:#8A8271;margin-top:4px;">{{ t.meta }}</div>
+                  </div>
+                  <span style="{{ t.badgeStyle }}">{{ t.statusLabel }}</span>
+                </div>
+                <sc-if value="{{ t.hasActions }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:8px;margin-top:14px;">
+                  <sc-if value="{{ t.canEdit }}" hint-placeholder-val="{{ true }}">
+                    <button onClick="{{ t.onEdit }}" style="flex:1;padding:9px;border-radius:10px;border:1px solid #E4DCCC;background:#FFFDF8;color:#4A453C;font-size:13px;font-weight:600;cursor:pointer;">Edit</button>
+                  </sc-if>
+                  <sc-if value="{{ t.canCancel }}" hint-placeholder-val="{{ true }}">
+                    <button onClick="{{ t.onCancel }}" style="flex:1;padding:9px;border-radius:10px;border:1px solid #EAD9D4;background:#FFF;color:#A8483C;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+                  </sc-if>
+                </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noMyTrips }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:56px 20px;color:#A79E8C;">
+            <div style="font-family:'Instrument Serif',serif;font-size:22px;color:#8A8271;">No requests yet</div>
+            <p style="font-size:14px;margin:8px 0 20px;">Pick your dates on the calendar to get started.</p>
+            <button onClick="{{ goCalendar }}" style="padding:11px 20px;border-radius:12px;border:none;background:var(--accent,#B85C38);color:#fff;font-weight:600;font-size:14px;cursor:pointer;">Open calendar</button>
+          </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <!-- HOST · OVERVIEW -->
+      <sc-if value="{{ showHostOverview }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:casaFade .3s ease;">
+        <p style="margin:2px 0 2px;color:#A79E8C;font-size:12px;letter-spacing:2px;text-transform:uppercase;">{{ todayLabel }}</p>
+        <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;line-height:1.1;margin:0 0 18px;">Hello, {{ hostFirst }}</h1>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:22px;">
+          <div style="background:#FFFDF8;border:1px solid #EBE3D5;border-radius:14px;padding:14px 12px;">
+            <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1;">{{ hereNow }}</div>
+            <div style="font-size:11px;color:#8A8271;margin-top:4px;">Here now</div>
+          </div>
+          <div style="background:#FFFDF8;border:1px solid #EBE3D5;border-radius:14px;padding:14px 12px;">
+            <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1;color:#8A5A16;">{{ pendingCount }}</div>
+            <div style="font-size:11px;color:#8A8271;margin-top:4px;">Pending</div>
+          </div>
+          <div style="background:#FFFDF8;border:1px solid #EBE3D5;border-radius:14px;padding:14px 12px;">
+            <div style="font-family:'Instrument Serif',serif;font-size:30px;line-height:1;">{{ upcomingCount }}</div>
+            <div style="font-size:11px;color:#8A8271;margin-top:4px;">Upcoming</div>
+          </div>
+        </div>
+
+        <sc-if value="{{ hasPending }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ goRequests }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:#FBF0DA;border:1px solid #F0DFB8;border-radius:14px;padding:14px 16px;margin-bottom:22px;cursor:pointer;text-align:left;">
+            <span style="font-size:14px;color:#7A5310;font-weight:600;">{{ pendingCount }} request(s) awaiting your reply</span>
+            <span style="color:#7A5310;font-size:18px;">›</span>
+          </button>
+        </sc-if>
+
+        <h2 style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#A79E8C;margin:0 0 10px;">Arriving soon</h2>
+        <sc-if value="{{ hasArrivals }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:22px;">
+            <sc-for list="{{ arrivals }}" as="a" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:12px;background:#FFFDF8;border:1px solid #EBE3D5;border-radius:13px;padding:12px 14px;">
+                <div style="flex:none;width:44px;text-align:center;">
+                  <div style="font-family:'Instrument Serif',serif;font-size:20px;line-height:1;">{{ a.day }}</div>
+                  <div style="font-size:10px;text-transform:uppercase;color:#A79E8C;letter-spacing:1px;">{{ a.mon }}</div>
+                </div>
+                <div style="flex:1;border-left:1px solid #EEE7DA;padding-left:12px;">
+                  <div style="font-size:15px;font-weight:600;">{{ a.name }}</div>
+                  <div style="font-size:12px;color:#8A8271;">{{ a.meta }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noArrivals }}" hint-placeholder-val="{{ true }}">
+          <p style="color:#B0A794;font-size:14px;margin:0 0 22px;">Nobody scheduled yet.</p>
+        </sc-if>
+
+        <h2 style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#A79E8C;margin:0 0 10px;">Departing soon</h2>
+        <sc-if value="{{ hasDepartures }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ departures }}" as="d" hint-placeholder-count="1">
+              <div style="display:flex;align-items:center;gap:12px;background:#FFFDF8;border:1px solid #EBE3D5;border-radius:13px;padding:12px 14px;">
+                <div style="flex:none;width:44px;text-align:center;">
+                  <div style="font-family:'Instrument Serif',serif;font-size:20px;line-height:1;">{{ d.day }}</div>
+                  <div style="font-size:10px;text-transform:uppercase;color:#A79E8C;letter-spacing:1px;">{{ d.mon }}</div>
+                </div>
+                <div style="flex:1;border-left:1px solid #EEE7DA;padding-left:12px;">
+                  <div style="font-size:15px;font-weight:600;">{{ d.name }}</div>
+                  <div style="font-size:12px;color:#8A8271;">{{ d.meta }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noDepartures }}" hint-placeholder-val="{{ true }}">
+          <p style="color:#B0A794;font-size:14px;margin:0;">Nobody scheduled yet.</p>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <!-- HOST · REQUESTS -->
+      <sc-if value="{{ showHostRequests }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:casaFade .3s ease;">
+        <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;line-height:1.1;margin:2px 0 18px;">Requests</h1>
+        <sc-if value="{{ hasRequests }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <sc-for list="{{ requests }}" as="r" hint-placeholder-count="3">
+              <div style="background:#FFFDF8;border:1px solid #EBE3D5;border-radius:16px;padding:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                  <div>
+                    <div style="font-size:16px;font-weight:700;">{{ r.name }}</div>
+                    <div style="font-size:12px;color:#A79E8C;">{{ r.email }}</div>
+                  </div>
+                  <span style="{{ r.badgeStyle }}">{{ r.statusLabel }}</span>
+                </div>
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid #F0EADE;display:flex;flex-direction:column;gap:5px;">
+                  <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:#8A8271;">Dates</span><span style="font-weight:600;">{{ r.range }}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:#8A8271;">Guests</span><span style="font-weight:600;">{{ r.people }}</span></div>
+                  <sc-if value="{{ r.hasGuests }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;justify-content:space-between;font-size:14px;gap:10px;"><span style="color:#8A8271;flex:none;">Party</span><span style="font-weight:600;text-align:right;">{{ r.guestNames }}</span></div>
+                  </sc-if>
+                </div>
+                <sc-if value="{{ r.isPending }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:8px;margin-top:14px;">
+                  <button onClick="{{ r.onReject }}" style="flex:1;padding:10px;border-radius:11px;border:1px solid #EAD9D4;background:#FFF;color:#A8483C;font-size:14px;font-weight:600;cursor:pointer;">Decline</button>
+                  <button onClick="{{ r.onApprove }}" style="flex:1;padding:10px;border-radius:11px;border:none;background:#4E7A52;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Approve</button>
+                </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noRequests }}" hint-placeholder-val="{{ true }}">
+          <p style="color:#B0A794;font-size:14px;">No requests yet.</p>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <!-- HOST · CALENDAR -->
+      <sc-if value="{{ showHostCal }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:casaFade .3s ease;">
+        <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;line-height:1.1;margin:2px 0 4px;">Calendar</h1>
+        <p style="margin:0 0 20px;color:#7C7568;font-size:14px;line-height:1.5;">Tap free dates to add a visit yourself.</p>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <button onClick="{{ prevMonth }}" style="width:36px;height:36px;border-radius:50%;border:1px solid #E4DCCC;background:#FFFDF8;cursor:pointer;color:#6B6459;font-size:18px;line-height:1;">‹</button>
+          <span style="font-family:'Instrument Serif',serif;font-size:21px;">{{ monthLabel }}</span>
+          <button onClick="{{ nextMonth }}" style="width:36px;height:36px;border-radius:50%;border:1px solid #E4DCCC;background:#FFFDF8;cursor:pointer;color:#6B6459;font-size:18px;line-height:1;">›</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px;">
+          <sc-for list="{{ weekdays }}" as="w" hint-placeholder-count="7">
+            <span style="text-align:center;font-size:11px;letter-spacing:.5px;color:#B0A794;text-transform:uppercase;">{{ w }}</span>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
+          <sc-for list="{{ calCells }}" as="cell" hint-placeholder-count="35">
+            <div style="{{ cell.style }}" onClick="{{ cell.onClick }}">
+              <span>{{ cell.label }}</span>
+              <span style="{{ cell.dotStyle }}"></span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:18px;font-size:12px;color:#7C7568;">
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#4E7A52;"></span>Booked</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#C98A2B;"></span>Pending</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:2px;background:#DED6C6;"></span>Blocked</span>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- HOST · BLOCKS -->
+      <sc-if value="{{ showHostBlocks }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:casaFade .3s ease;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:2px 0 18px;">
+          <h1 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:30px;line-height:1.1;margin:0;">Blocked</h1>
+          <button onClick="{{ openBlockForm }}" style="padding:9px 15px;border-radius:11px;border:none;background:var(--accent,#B85C38);color:#fff;font-size:13px;font-weight:600;cursor:pointer;">＋ Block dates</button>
+        </div>
+        <p style="margin:0 0 18px;color:#7C7568;font-size:14px;line-height:1.5;">Guests can't request dates inside these periods.</p>
+        <sc-if value="{{ hasBlocks }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ blocksList }}" as="b" hint-placeholder-count="1">
+              <div style="display:flex;align-items:center;gap:12px;background:#FFFDF8;border:1px solid #EBE3D5;border-radius:14px;padding:14px 16px;">
+                <div style="flex:1;">
+                  <div style="font-size:15px;font-weight:600;">{{ b.range }}</div>
+                  <div style="font-size:13px;color:#8A8271;margin-top:2px;">{{ b.reason }}</div>
+                </div>
+                <button onClick="{{ b.onRemove }}" style="flex:none;width:32px;height:32px;border-radius:9px;border:1px solid #EAD9D4;background:#FFF;color:#A8483C;cursor:pointer;font-size:16px;line-height:1;">×</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noBlocks }}" hint-placeholder-val="{{ true }}">
+          <p style="color:#B0A794;font-size:14px;">No blocked periods.</p>
+        </sc-if>
+      </div>
+      </sc-if>
+
+    </main>
+
+    <!-- SELECTION BAR -->
+    <sc-if value="{{ showSelBar }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:0;right:0;bottom:74px;padding:0 16px;animation:casaUp .28s ease;">
+        <div style="background:#23211C;color:#F6F2EA;border-radius:16px;padding:12px 14px 12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 10px 30px rgba(35,33,28,.28);">
+          <div style="line-height:1.2;">
+            <div style="font-size:11px;color:#B7AF9E;letter-spacing:.5px;">{{ selNights }}</div>
+            <div style="font-size:15px;font-weight:600;">{{ selRange }}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button onClick="{{ clearSel }}" style="width:36px;height:36px;border-radius:10px;border:1px solid #444038;background:transparent;color:#B7AF9E;cursor:pointer;font-size:16px;">×</button>
+            <button onClick="{{ startRequest }}" style="padding:0 16px;height:38px;border-radius:11px;border:none;background:var(--accent,#B85C38);color:#fff;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">{{ ctaLabel }}</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- BOTTOM NAV -->
+    <nav style="flex:none;position:absolute;left:0;right:0;bottom:0;height:74px;background:rgba(246,242,234,.92);backdrop-filter:blur(12px);border-top:1px solid #EBE3D5;display:flex;padding:8px 8px 14px;">
+      <sc-for list="{{ tabs }}" as="navItem" hint-placeholder-count="3">
+        <button onClick="{{ navItem.onClick }}" style="{{ navItem.style }}">
+          <span style="{{ navItem.dotStyle }}"></span>
+          <span>{{ navItem.label }}</span>
+        </button>
+      </sc-for>
+    </nav>
+
+  </div>
+
+  <!-- APPLY / EDIT MODAL -->
+  <sc-if value="{{ showApply }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(30,26,20,.42);display:flex;align-items:flex-end;justify-content:center;z-index:40;animation:casaFade .2s ease;">
+      <div onClick="{{ stop }}" class="cc-scroll" style="width:100%;max-width:440px;max-height:92dvh;overflow-y:auto;background:#F6F2EA;border-radius:22px 22px 0 0;padding:22px 20px 28px;animation:casaSheet .3s cubic-bezier(.32,.72,0,1);">
+        <div style="width:38px;height:4px;border-radius:2px;background:#DED6C6;margin:0 auto 18px;"></div>
+        <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:26px;margin:0 0 18px;">{{ applyTitle }}</h2>
+
+        <label style="display:block;font-size:12px;font-weight:600;color:#8A8271;letter-spacing:.4px;margin-bottom:6px;">Your name</label>
+        <input value="{{ form.name }}" onInput="{{ onName }}" placeholder="Full name" style="width:100%;padding:13px 14px;border-radius:12px;border:1px solid #E4DCCC;background:#FFFDF8;font-size:15px;margin-bottom:14px;">
+
+        <label style="display:block;font-size:12px;font-weight:600;color:#8A8271;letter-spacing:.4px;margin-bottom:6px;">Email</label>
+        <input value="{{ form.email }}" onInput="{{ onEmail }}" type="email" placeholder="you@email.com" style="width:100%;padding:13px 14px;border-radius:12px;border:1px solid #E4DCCC;background:#FFFDF8;font-size:15px;margin-bottom:14px;">
+
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+          <div style="flex:1;">
+            <label style="display:block;font-size:12px;font-weight:600;color:#8A8271;letter-spacing:.4px;margin-bottom:6px;">Arrival</label>
+            <input value="{{ form.arrival }}" onInput="{{ onArrival }}" type="date" style="width:100%;padding:12px 12px;border-radius:12px;border:1px solid #E4DCCC;background:#FFFDF8;font-size:14px;color:#23211C;">
+          </div>
+          <div style="flex:1;">
+            <label style="display:block;font-size:12px;font-weight:600;color:#8A8271;letter-spacing:.4px;margin-bottom:6px;">Departure</label>
+            <input value="{{ form.departure }}" onInput="{{ onDeparture }}" type="date" style="width:100%;padding:12px 12px;border-radius:12px;border:1px solid #E4DCCC;background:#FFFDF8;font-size:14px;color:#23211C;">
+          </div>
+        </div>
+
+        <label style="display:block;font-size:12px;font-weight:600;color:#8A8271;letter-spacing:.4px;margin-bottom:6px;">How many people</label>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;background:#FFFDF8;border:1px solid #E4DCCC;border-radius:12px;padding:8px 14px;width:fit-content;">
+          <button onClick="{{ decPeople }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #E4DCCC;background:#F6F2EA;font-size:18px;cursor:pointer;color:#4A453C;line-height:1;">–</button>
+          <span style="font-size:18px;font-weight:600;min-width:22px;text-align:center;">{{ form.people }}</span>
+          <button onClick="{{ incPeople }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #E4DCCC;background:#F6F2EA;font-size:18px;cursor:pointer;color:#4A453C;line-height:1;">＋</button>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <label style="font-size:12px;font-weight:600;color:#8A8271;letter-spacing:.4px;">Who's coming with you</label>
+          <button onClick="{{ addGuest }}" style="font-size:13px;color:var(--accent,#B85C38);background:none;border:none;cursor:pointer;font-weight:600;">＋ Add</button>
+        </div>
+        <sc-if value="{{ hasFormGuests }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+            <sc-for list="{{ formGuests }}" as="g" hint-placeholder-count="1">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input value="{{ g.name }}" onInput="{{ g.onName }}" placeholder="Name" style="flex:1;padding:11px 12px;border-radius:11px;border:1px solid #E4DCCC;background:#FFFDF8;font-size:14px;min-width:0;">
+                <input value="{{ g.email }}" onInput="{{ g.onEmail }}" placeholder="Email" style="flex:1.3;padding:11px 12px;border-radius:11px;border:1px solid #E4DCCC;background:#FFFDF8;font-size:14px;min-width:0;">
+                <button onClick="{{ g.onRemove }}" style="flex:none;width:34px;height:34px;border-radius:9px;border:1px solid #EAD9D4;background:#FFF;color:#A8483C;cursor:pointer;font-size:15px;">×</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noFormGuests }}" hint-placeholder-val="{{ true }}">
+          <p style="font-size:13px;color:#B0A794;margin:0 0 14px;">Just you, for now. Add family or friends by email to invite them to your stay.</p>
+        </sc-if>
+
+        <sc-if value="{{ formError }}" hint-placeholder-val="{{ false }}">
+          <p style="color:#A8483C;font-size:13px;margin:0 0 12px;">{{ formErrorText }}</p>
+        </sc-if>
+
+        <div style="display:flex;gap:10px;margin-top:6px;">
+          <sc-if value="{{ showDraftBtn }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ saveDraft }}" style="flex:1;padding:14px;border-radius:13px;border:1px solid #E4DCCC;background:#FFFDF8;color:#4A453C;font-size:15px;font-weight:600;cursor:pointer;">Save draft</button>
+          </sc-if>
+          <button onClick="{{ submitForm }}" style="flex:1.4;padding:14px;border-radius:13px;border:none;background:var(--accent,#B85C38);color:#fff;font-size:15px;font-weight:700;cursor:pointer;">{{ submitLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- BLOCK FORM MODAL -->
+  <sc-if value="{{ showBlockForm }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(30,26,20,.42);display:flex;align-items:flex-end;justify-content:center;z-index:40;animation:casaFade .2s ease;">
+      <div onClick="{{ stop }}" style="width:100%;max-width:440px;background:#F6F2EA;border-radius:22px 22px 0 0;padding:22px 20px 28px;animation:casaSheet .3s cubic-bezier(.32,.72,0,1);">
+        <div style="width:38px;height:4px;border-radius:2px;background:#DED6C6;margin:0 auto 18px;"></div>
+        <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:26px;margin:0 0 18px;">Block a period</h2>
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+          <div style="flex:1;">
+            <label style="display:block;font-size:12px;font-weight:600;color:#8A8271;margin-bottom:6px;">From</label>
+            <input value="{{ blockForm.start }}" onInput="{{ onBlockStart }}" type="date" style="width:100%;padding:12px;border-radius:12px;border:1px solid #E4DCCC;background:#FFFDF8;font-size:14px;">
+          </div>
+          <div style="flex:1;">
+            <label style="display:block;font-size:12px;font-weight:600;color:#8A8271;margin-bottom:6px;">To</label>
+            <input value="{{ blockForm.end }}" onInput="{{ onBlockEnd }}" type="date" style="width:100%;padding:12px;border-radius:12px;border:1px solid #E4DCCC;background:#FFFDF8;font-size:14px;">
+          </div>
+        </div>
+        <label style="display:block;font-size:12px;font-weight:600;color:#8A8271;margin-bottom:6px;">Reason (optional)</label>
+        <input value="{{ blockForm.reason }}" onInput="{{ onBlockReason }}" placeholder="e.g. Away for work" style="width:100%;padding:13px 14px;border-radius:12px;border:1px solid #E4DCCC;background:#FFFDF8;font-size:15px;margin-bottom:16px;">
+        <sc-if value="{{ blockError }}" hint-placeholder-val="{{ false }}">
+          <p style="color:#A8483C;font-size:13px;margin:0 0 12px;">{{ blockErrorText }}</p>
+        </sc-if>
+        <button onClick="{{ saveBlock }}" style="width:100%;padding:14px;border-radius:13px;border:none;background:var(--accent,#B85C38);color:#fff;font-size:15px;font-weight:700;cursor:pointer;">Block these dates</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- INBOX MODAL -->
+  <sc-if value="{{ showInbox }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(30,26,20,.42);display:flex;align-items:flex-end;justify-content:center;z-index:40;animation:casaFade .2s ease;">
+      <div onClick="{{ stop }}" class="cc-scroll" style="width:100%;max-width:440px;max-height:80dvh;overflow-y:auto;background:#F6F2EA;border-radius:22px 22px 0 0;padding:22px 20px 28px;animation:casaSheet .3s cubic-bezier(.32,.72,0,1);">
+        <div style="width:38px;height:4px;border-radius:2px;background:#DED6C6;margin:0 auto 18px;"></div>
+        <h2 style="font-family:'Instrument Serif',serif;font-weight:400;font-size:26px;margin:0 0 4px;">Mail</h2>
+        <p style="margin:0 0 18px;color:#8A8271;font-size:13px;">Notifications sent by Casa. In the live app these arrive by email.</p>
+        <sc-if value="{{ hasEmails }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ emailList }}" as="e" hint-placeholder-count="2">
+              <button onClick="{{ e.onOpen }}" style="text-align:left;background:#FFFDF8;border:1px solid #EBE3D5;border-radius:14px;padding:14px 16px;cursor:pointer;">
+                <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;">
+                  <span style="font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:{{ e.tagColor }};font-weight:700;">{{ e.tag }}</span>
+                  <span style="font-size:11px;color:#B0A794;">{{ e.time }}</span>
+                </div>
+                <div style="font-size:15px;font-weight:600;margin-top:5px;">{{ e.subject }}</div>
+                <div style="font-size:12px;color:#8A8271;margin-top:2px;">To {{ e.to }}</div>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noEmails }}" hint-placeholder-val="{{ true }}">
+          <p style="color:#B0A794;font-size:14px;">No mail yet.</p>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- EMAIL PREVIEW MODAL -->
+  <sc-if value="{{ showEmail }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeEmail }}" style="position:fixed;inset:0;background:rgba(30,26,20,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;animation:casaFade .2s ease;">
+      <div onClick="{{ stop }}" style="width:100%;max-width:400px;background:#FFFDF8;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(30,26,20,.35);animation:casaUp .3s ease;">
+        <div style="background:var(--accent,#B85C38);padding:16px 20px;color:#fff;">
+          <div style="font-size:11px;opacity:.8;letter-spacing:.5px;">FROM CASA · LOS ANGELES</div>
+          <div style="font-size:18px;font-weight:700;margin-top:3px;">{{ emailView.subject }}</div>
+        </div>
+        <div style="padding:16px 20px;border-bottom:1px solid #F0EADE;font-size:13px;color:#8A8271;">To: <span style="color:#23211C;font-weight:600;">{{ emailView.to }}</span></div>
+        <div style="padding:20px;font-size:14px;line-height:1.65;color:#3A362E;white-space:pre-line;">{{ emailView.body }}</div>
+        <div style="padding:0 20px 20px;">
+          <button onClick="{{ closeEmail }}" style="width:100%;padding:13px;border-radius:12px;border:1px solid #E4DCCC;background:#F6F2EA;color:#4A453C;font-size:14px;font-weight:600;cursor:pointer;">Close</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ showToast }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ toastTap }}" style="position:fixed;left:50%;transform:translateX(-50%);bottom:90px;z-index:60;background:#23211C;color:#F6F2EA;padding:12px 18px;border-radius:999px;font-size:13.5px;font-weight:600;box-shadow:0 10px 30px rgba(35,33,28,.3);animation:casaUp .3s ease;display:flex;align-items:center;gap:9px;cursor:pointer;max-width:400px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:{{ toastColor }};flex:none;"></span>
+      {{ toastText }}
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:440,&quot;height&quot;:900},&quot;hostName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Alex&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Setup&quot;},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B85C38&quot;,&quot;options&quot;:[&quot;#B85C38&quot;,&quot;#4E7A52&quot;,&quot;#3E5C74&quot;,&quot;#8A5A16&quot;,&quot;#6E5773&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Style&quot;},&quot;startRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;guest&quot;,&quot;options&quot;:[&quot;guest&quot;,&quot;host&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Setup&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const now = new Date();
+    this.state = {
+      role: 'guest',
+      tab: 'calendar',
+      monthY: now.getFullYear(),
+      monthM: now.getMonth(),
+      applications: [],
+      blocks: [],
+      emails: [],
+      sel: { start: null, end: null },
+      modal: null,          // 'apply' | 'block' | 'inbox' | 'email'
+      hostAdd: false,
+      form: null,
+      blockForm: null,
+      emailView: null,
+      formErrorText: '',
+      blockErrorText: '',
+      toast: null,          // { text, color, email }
+      loaded: false,
+    };
+    this._toastTimer = null;
+  }
+
+  // ---------- lifecycle / persistence ----------
+  componentDidMount() {
+    const KEY = 'casa_la_v1';
+    let data = null;
+    try { data = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+    if (!data || !data.applications) data = this.seed();
+    this.setState({
+      applications: data.applications,
+      blocks: data.blocks,
+      emails: data.emails,
+      role: this.props.startRole || 'guest',
+      tab: (this.props.startRole === 'host') ? 'overview' : 'calendar',
+      loaded: true,
+    });
+  }
+  persist(patch) {
+    this.setState(patch, () => {
+      try {
+        localStorage.setItem('casa_la_v1', JSON.stringify({
+          applications: this.state.applications,
+          blocks: this.state.blocks,
+          emails: this.state.emails,
+        }));
+      } catch (e) {}
+    });
+  }
+
+  // ---------- date helpers ----------
+  pad(n) { return String(n).padStart(2, '0'); }
+  iso(off) { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + off); return this.isoOf(d); }
+  isoOf(d) { return d.getFullYear() + '-' + this.pad(d.getMonth()+1) + '-' + this.pad(d.getDate()); }
+  today() { return this.isoOf(new Date()); }
+  toDate(iso) { return new Date(iso + 'T00:00:00'); }
+  fmt(iso) { if (!iso) return ''; return this.toDate(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+  fmtRange(a, b) { if (a === b || !b) return this.fmt(a); return this.fmt(a) + ' → ' + this.fmt(b); }
+  nights(a, b) { if (!b || a === b) return '1 night'; const n = Math.round((this.toDate(b) - this.toDate(a)) / 86400000); return n + (n === 1 ? ' night' : ' nights'); }
+  uid() { return Math.random().toString(36).slice(2, 9); }
+
+  seed() {
+    const mk = (o) => Object.assign({ id: this.uid(), guests: [], mine: false }, o);
+    return {
+      applications: [
+        mk({ name: 'Nadia Alvarez', email: 'nadia@email.com', arrival: this.iso(-1), departure: this.iso(3), people: 2, status: 'approved' }),
+        mk({ name: 'Elena Ruiz', email: 'elena@email.com', arrival: this.iso(18), departure: this.iso(24), people: 2, status: 'approved' }),
+        mk({ name: 'Marco Ruiz', email: 'marco@email.com', arrival: this.iso(31), departure: this.iso(35), people: 3, status: 'pending' }),
+        mk({ name: 'You', email: 'me@email.com', arrival: this.iso(46), departure: this.iso(50), people: 2, status: 'pending', mine: true, guests: [{ name: 'Sam', email: 'sam@email.com' }] }),
+      ],
+      blocks: [ { id: this.uid(), start: this.iso(6), end: this.iso(12), reason: 'Away for work' } ],
+      emails: [],
+    };
+  }
+
+  // ---------- lookups ----------
+  isBlocked(iso) { return this.state.blocks.some(b => iso >= b.start && iso <= b.end); }
+  approvedOn(iso) { return this.state.applications.filter(a => a.status === 'approved' && iso >= a.arrival && iso <= a.departure); }
+  pendingOn(iso) { return this.state.applications.filter(a => a.status === 'pending' && iso >= a.arrival && iso <= a.departure); }
+  rangeOpen(a, b) {
+    const s = this.toDate(a), e = this.toDate(b);
+    for (let d = new Date(s); d <= e; d.setDate(d.getDate()+1)) {
+      const iso = this.isoOf(d);
+      if (this.isBlocked(iso) || this.approvedOn(iso).length) return false;
+    }
+    return true;
+  }
+  statusMeta(s) {
+    const m = {
+      draft:     { label: 'Draft',     fg: '#6B6459', bg: '#ECE7DD' },
+      pending:   { label: 'Pending',   fg: '#8A5A16', bg: '#F6E8CE' },
+      approved:  { label: 'Approved',  fg: '#2F5A3A', bg: '#DCEBDD' },
+      rejected:  { label: 'Declined',  fg: '#8A3529', bg: '#F3DAD5' },
+      cancelled: { label: 'Cancelled', fg: '#6B6459', bg: '#ECE7DD' },
+    };
+    return m[s] || m.draft;
+  }
+  badge(s) { const m = this.statusMeta(s); return `flex:none;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;color:${m.fg};background:${m.bg};`; }
+
+  // ---------- navigation ----------
+  setRole(r) { this.setState({ role: r, tab: r === 'host' ? 'overview' : 'calendar', sel: { start: null, end: null }, modal: null }); }
+  setTab(t) { this.setState({ tab: t, sel: { start: null, end: null } }); }
+  prevMonth() { let y = this.state.monthY, m = this.state.monthM - 1; if (m < 0) { m = 11; y--; } this.setState({ monthY: y, monthM: m }); }
+  nextMonth() { let y = this.state.monthY, m = this.state.monthM + 1; if (m > 11) { m = 0; y++; } this.setState({ monthY: y, monthM: m }); }
+
+  // ---------- calendar interaction ----------
+  tapDay(iso) {
+    const { start, end } = this.state.sel;
+    let sel;
+    if (!start || end) {
+      sel = { start: iso, end: null };
+    } else if (iso < start) {
+      sel = { start: iso, end: null };
+    } else if (iso === start) {
+      sel = { start: iso, end: null };
+    } else {
+      if (!this.rangeOpen(start, iso)) { this.flash('Those dates aren\u2019t all available', '#A8483C'); this.setState({ sel: { start: iso, end: null } }); return; }
+      sel = { start, end: iso };
+    }
+    this.setState({ sel });
+  }
+  clearSel() { this.setState({ sel: { start: null, end: null } }); }
+
+  // ---------- apply form ----------
+  startRequest() {
+    const s = this.state.sel;
+    const arrival = s.start || this.today();
+    const departure = s.end || s.start || this.today();
+    this.setState({
+      modal: 'apply', hostAdd: this.state.role === 'host', formErrorText: '',
+      form: { id: null, name: this.state.role === 'host' ? '' : '', email: '', arrival, departure, people: 2, guests: [], status: 'draft', mine: this.state.role === 'guest' },
+    });
+  }
+  editApp(id) {
+    const a = this.state.applications.find(x => x.id === id);
+    if (!a) return;
+    this.setState({ modal: 'apply', hostAdd: false, formErrorText: '', form: JSON.parse(JSON.stringify(a)) });
+  }
+  setForm(patch) { this.setState({ form: Object.assign({}, this.state.form, patch) }); }
+  incPeople() { this.setForm({ people: Math.min(20, this.state.form.people + 1) }); }
+  decPeople() { this.setForm({ people: Math.max(1, this.state.form.people - 1) }); }
+  addGuest() { this.setForm({ guests: this.state.form.guests.concat([{ name: '', email: '' }]) }); }
+  removeGuest(i) { const g = this.state.form.guests.slice(); g.splice(i, 1); this.setForm({ guests: g }); }
+  updateGuest(i, field, val) { const g = this.state.form.guests.map((x, j) => j === i ? Object.assign({}, x, { [field]: val }) : x); this.setForm({ guests: g }); }
+
+  validateForm() {
+    const f = this.state.form;
+    if (!f.name.trim()) return 'Please add your name.';
+    if (!/.+@.+\..+/.test(f.email)) return 'Please add a valid email.';
+    if (!f.arrival || !f.departure) return 'Please choose your dates.';
+    if (f.departure < f.arrival) return 'Departure can\u2019t be before arrival.';
+    if (!this.rangeOpen(f.arrival, f.departure)) {
+      // allow the app's own currently-approved range when editing itself
+      const others = this.state.applications.filter(a => a.id !== f.id);
+      const s = this.toDate(f.arrival), e = this.toDate(f.departure);
+      for (let d = new Date(s); d <= e; d.setDate(d.getDate()+1)) {
+        const iso = this.isoOf(d);
+        if (this.isBlocked(iso)) return 'Some of those dates are blocked.';
+        if (others.some(a => a.status === 'approved' && iso >= a.arrival && iso <= a.departure)) return 'Some of those dates are already booked.';
+      }
+    }
+    return '';
+  }
+  upsert(app) {
+    const list = this.state.applications.slice();
+    const i = list.findIndex(a => a.id === app.id);
+    if (i >= 0) list[i] = app; else list.push(app);
+    return list;
+  }
+  saveDraft() {
+    const err = this.validateForm();
+    if (err) { this.setState({ formErrorText: err }); return; }
+    const f = this.state.form;
+    const app = Object.assign({}, f, { id: f.id || this.uid(), status: 'draft', mine: true });
+    this.persist({ applications: this.upsert(app), modal: null, sel: { start: null, end: null } });
+    this.flash('Saved as draft', '#6B6459');
+  }
+  submitForm() {
+    const err = this.validateForm();
+    if (err) { this.setState({ formErrorText: err }); return; }
+    const f = this.state.form;
+    if (this.state.hostAdd) {
+      const app = Object.assign({}, f, { id: f.id || this.uid(), status: 'approved', mine: false });
+      this.persist({ applications: this.upsert(app), modal: null, sel: { start: null, end: null } });
+      this.flash('Visit added to your calendar', '#4E7A52');
+      return;
+    }
+    const app = Object.assign({}, f, { id: f.id || this.uid(), status: 'pending', mine: true });
+    const list = this.upsert(app);
+    const email = this.makeEmail('request', app);
+    this.persist({ applications: list, emails: [email].concat(this.state.emails), modal: null, sel: { start: null, end: null } });
+    this.flash('Request sent to your host', '#C98A2B', email);
+  }
+
+  // ---------- host actions ----------
+  approveApp(id) {
+    const list = this.state.applications.map(a => a.id === id ? Object.assign({}, a, { status: 'approved' }) : a);
+    const app = list.find(a => a.id === id);
+    const email = this.makeEmail('approved', app);
+    this.persist({ applications: list, emails: [email].concat(this.state.emails) });
+    this.flash(app.name + ' approved \u2014 email sent', '#4E7A52', email);
+  }
+  rejectApp(id) {
+    const list = this.state.applications.map(a => a.id === id ? Object.assign({}, a, { status: 'rejected' }) : a);
+    const app = list.find(a => a.id === id);
+    const email = this.makeEmail('rejected', app);
+    this.persist({ applications: list, emails: [email].concat(this.state.emails) });
+    this.flash(app.name + ' declined \u2014 email sent', '#A8483C', email);
+  }
+  cancelApp(id) {
+    const list = this.state.applications.map(a => a.id === id ? Object.assign({}, a, { status: 'cancelled' }) : a);
+    this.persist({ applications: list });
+    this.flash('Request cancelled', '#6B6459');
+  }
+
+  // ---------- blocks ----------
+  openBlockForm() { this.setState({ modal: 'block', blockForm: { start: '', end: '', reason: '' }, blockErrorText: '' }); }
+  setBlock(patch) { this.setState({ blockForm: Object.assign({}, this.state.blockForm, patch) }); }
+  saveBlock() {
+    const b = this.state.blockForm;
+    if (!b.start || !b.end) { this.setState({ blockErrorText: 'Please choose both dates.' }); return; }
+    if (b.end < b.start) { this.setState({ blockErrorText: 'End date can\u2019t be before start.' }); return; }
+    const block = { id: this.uid(), start: b.start, end: b.end, reason: b.reason.trim() || 'Unavailable' };
+    this.persist({ blocks: this.state.blocks.concat([block]), modal: null });
+    this.flash('Dates blocked', '#6B6459');
+  }
+  removeBlock(id) { this.persist({ blocks: this.state.blocks.filter(b => b.id !== id) }); }
+
+  // ---------- email / toast ----------
+  hostEmail() { return (this.props.hostName || 'Host').split(' ')[0].toLowerCase() + '@casa.la'; }
+  makeEmail(kind, app) {
+    const host = this.props.hostName || 'your host';
+    const range = this.fmtRange(app.arrival, app.departure);
+    let to, subject, body, tag, tagColor;
+    if (kind === 'request') {
+      to = this.hostEmail(); tag = 'New request'; tagColor = '#8A5A16';
+      subject = 'New visit request \u2014 ' + app.name;
+      body = `${app.name} has requested to stay.\n\nDates:  ${range}\nGuests:  ${app.people} ${app.people === 1 ? 'person' : 'people'}\nEmail:  ${app.email}` + (app.guests.length ? `\nParty:  ${app.guests.map(g => g.name || g.email).join(', ')}` : '') + `\n\nOpen Casa to approve or decline this request.`;
+    } else if (kind === 'approved') {
+      to = app.email; tag = 'Approved'; tagColor = '#2F5A3A';
+      subject = 'Your stay in Los Angeles is confirmed';
+      body = `Hi ${app.name},\n\nGreat news \u2014 ${host} has confirmed your visit.\n\nArrival:  ${this.fmt(app.arrival)}\nDeparture:  ${this.fmt(app.departure)}\nGuests:  ${app.people}\n\nWe can\u2019t wait to see you. See you soon!`;
+    } else {
+      to = app.email; tag = 'Declined'; tagColor = '#8A3529';
+      subject = 'Update on your visit request';
+      body = `Hi ${app.name},\n\nThank you for your request for ${range}. Unfortunately those dates won\u2019t work this time.\n\nPlease feel free to open Casa and choose another period \u2014 we\u2019d love to have you.\n\nWarmly,\n${host}`;
+    }
+    return { id: this.uid(), to, subject, body, tag, tagColor, at: Date.now() };
+  }
+  flash(text, color, email) {
+    if (this._toastTimer) clearTimeout(this._toastTimer);
+    this.setState({ toast: { text, color: color || '#4E7A52', email: email || null } });
+    this._toastTimer = setTimeout(() => this.setState({ toast: null }), 4200);
+  }
+  toastTap() { const t = this.state.toast; if (t && t.email) { this.setState({ emailView: t.email, modal: 'email', toast: null }); } else { this.setState({ toast: null }); } }
+  openInbox() { this.setState({ modal: 'inbox' }); }
+  openEmail(e) { this.setState({ emailView: e, modal: 'email' }); }
+  closeEmail() { this.setState({ modal: this.state.emails.length && this._fromInbox ? 'inbox' : null, emailView: null }); this._fromInbox = false; }
+  closeModal() { this.setState({ modal: null }); }
+
+  // ---------- view models ----------
+  cellStyle(o) {
+    let bg = 'transparent', color = '#3A362E', border = '1px solid transparent', cursor = 'default', weight = '500', op = '1';
+    if (o.empty) return 'height:46px;';
+    if (o.isStart || o.isEnd) { bg = 'var(--accent,#B85C38)'; color = '#fff'; weight = '700'; cursor = 'pointer'; }
+    else if (o.inRange) { bg = 'rgba(184,92,56,.14)'; color = '#8B4A2C'; cursor = 'pointer'; }
+    else if (o.blocked) { bg = 'repeating-linear-gradient(-45deg,#EDE6D8,#EDE6D8 3px,#E3DACA 3px,#E3DACA 6px)'; color = '#B0A794'; }
+    else if (o.past) { color = '#CFC7B6'; }
+    else if (o.approved) { bg = '#EAF0E6'; color = '#3C5B3E'; }
+    else if (o.clickable) { bg = '#FFFDF8'; border = '1px solid #ECE5D8'; cursor = 'pointer'; }
+    if (o.past && !o.isStart && !o.inRange) op = '.85';
+    return `position:relative;height:46px;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:15px;background:${bg};color:${color};border:${border};cursor:${cursor};font-weight:${weight};opacity:${op};user-select:none;`;
+  }
+  dotStyle(o) {
+    if (o.isStart || o.isEnd || o.inRange) return 'display:none;';
+    let c = null;
+    if (o.approved) c = '#4E7A52'; else if (o.pending) c = '#C98A2B';
+    if (!c) return 'display:none;';
+    return `position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:${c};`;
+  }
+  buildCells() {
+    const { monthY: y, monthM: m, sel } = this.state;
+    const first = new Date(y, m, 1);
+    const lead = first.getDay();
+    const days = new Date(y, m + 1, 0).getDate();
+    const today = this.today();
+    const cells = [];
+    for (let i = 0; i < lead; i++) cells.push({ key: 'b' + i, empty: true, label: '', style: this.cellStyle({ empty: true }), dotStyle: 'display:none;', onClick: null });
+    for (let d = 1; d <= days; d++) {
+      const iso = `${y}-${this.pad(m+1)}-${this.pad(d)}`;
+      const past = iso < today;
+      const blocked = this.isBlocked(iso);
+      const approved = this.approvedOn(iso).length > 0;
+      const pending = this.pendingOn(iso).length > 0;
+      let isStart = false, isEnd = false, inRange = false;
+      if (sel.start && sel.end) { isStart = iso === sel.start; isEnd = iso === sel.end; inRange = iso > sel.start && iso < sel.end; }
+      else if (sel.start) { isStart = iso === sel.start; }
+      const clickable = !past && !blocked && !approved;
+      const o = { past, blocked, approved, pending, isStart, isEnd, inRange, clickable };
+      cells.push({ key: iso, empty: false, label: String(d), style: this.cellStyle(o), dotStyle: this.dotStyle(o), onClick: clickable ? (() => this.tapDay(iso)) : null });
+    }
+    return cells;
+  }
+
+  renderVals() {
+    const S = this.state;
+    const role = S.role, tab = S.tab;
+    const accent = this.props.accentColor || '#B85C38';
+    const isHost = role === 'host';
+    const today = this.today();
+
+    // pill styles
+    const pill = (on) => `border:none;cursor:pointer;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;background:${on ? '#FFFDF8' : 'transparent'};color:${on ? '#23211C' : '#8A8271'};box-shadow:${on ? '0 1px 3px rgba(0,0,0,.08)' : 'none'};`;
+
+    // tabs
+    const tabDefs = isHost
+      ? [ ['overview','Overview'], ['requests','Requests'], ['hcal','Calendar'], ['blocks','Blocked'] ]
+      : [ ['calendar','Calendar'], ['trips','My trips'] ];
+    const tabs = tabDefs.map(([id, label]) => {
+      const on = tab === id || (id === 'hcal' && tab === 'hcal');
+      const active = tab === id;
+      return {
+        key: id, label,
+        style: `flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;cursor:pointer;padding:6px 2px;font-size:11px;font-weight:600;color:${active ? '#23211C' : '#A79E8C'};`,
+        dotStyle: `width:5px;height:5px;border-radius:50%;background:${active ? accent : 'transparent'};`,
+        onClick: () => this.setTab(id),
+      };
+    });
+
+    // pending count badge on inbox dot
+    const pendingCount = S.applications.filter(a => a.status === 'pending').length;
+
+    // calendar
+    const calCells = this.buildCells();
+    const monthLabel = new Date(S.monthY, S.monthM, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    // selection bar
+    const hasSel = !!S.sel.start && !S.modal;
+    const selRange = S.sel.start ? this.fmtRange(S.sel.start, S.sel.end || S.sel.start) : '';
+    const selNights = S.sel.start ? (S.sel.end ? this.nights(S.sel.start, S.sel.end) : 'Pick your departure') : '';
+
+    // guest trips
+    const myAll = S.applications.filter(a => a.mine).sort((x, y) => x.arrival.localeCompare(y.arrival));
+    const myTrips = myAll.map(a => {
+      const canEdit = ['draft', 'pending', 'rejected'].includes(a.status);
+      const canCancel = ['draft', 'pending', 'approved'].includes(a.status);
+      const g = a.guests.length ? ` \u00b7 +${a.guests.length} invited` : '';
+      return {
+        key: a.id, range: this.fmtRange(a.arrival, a.departure),
+        meta: a.people + (a.people === 1 ? ' person' : ' people') + g,
+        statusLabel: this.statusMeta(a.status).label, badgeStyle: this.badge(a.status),
+        hasActions: canEdit || canCancel, canEdit, canCancel,
+        onEdit: () => this.editApp(a.id), onCancel: () => this.cancelApp(a.id),
+      };
+    });
+
+    // host overview
+    const approved = S.applications.filter(a => a.status === 'approved');
+    const hereNow = approved.filter(a => today >= a.arrival && today <= a.departure).reduce((s, a) => s + a.people, 0);
+    const upcoming = approved.filter(a => a.departure >= today);
+    const arrivals = approved.filter(a => a.arrival >= today).sort((x, y) => x.arrival.localeCompare(y.arrival)).slice(0, 4).map(a => ({
+      key: a.id, day: this.toDate(a.arrival).getDate(), mon: this.toDate(a.arrival).toLocaleDateString('en-US', { month: 'short' }),
+      name: a.name, meta: this.nights(a.arrival, a.departure) + ' \u00b7 ' + a.people + (a.people === 1 ? ' guest' : ' guests'),
+    }));
+    const departures = approved.filter(a => a.departure >= today).sort((x, y) => x.departure.localeCompare(y.departure)).slice(0, 4).map(a => ({
+      key: a.id, day: this.toDate(a.departure).getDate(), mon: this.toDate(a.departure).toLocaleDateString('en-US', { month: 'short' }),
+      name: a.name, meta: 'Leaves ' + this.fmt(a.departure),
+    }));
+
+    // host requests
+    const order = { pending: 0, approved: 1, draft: 2, rejected: 3, cancelled: 4 };
+    const requests = S.applications.slice().sort((x, y) => (order[x.status] - order[y.status]) || x.arrival.localeCompare(y.arrival)).map(a => ({
+      key: a.id, name: a.name, email: a.email, range: this.fmtRange(a.arrival, a.departure),
+      people: a.people + (a.people === 1 ? ' person' : ' people'),
+      hasGuests: a.guests.length > 0, guestNames: a.guests.map(g => g.name || g.email).join(', '),
+      statusLabel: this.statusMeta(a.status).label, badgeStyle: this.badge(a.status),
+      isPending: a.status === 'pending',
+      onApprove: () => this.approveApp(a.id), onReject: () => this.rejectApp(a.id),
+    }));
+
+    // blocks
+    const blocksList = S.blocks.slice().sort((x, y) => x.start.localeCompare(y.start)).map(b => ({
+      key: b.id, range: this.fmtRange(b.start, b.end), reason: b.reason, onRemove: () => this.removeBlock(b.id),
+    }));
+
+    // form guests
+    const form = S.form || { name: '', email: '', arrival: '', departure: '', people: 2, guests: [] };
+    const formGuests = form.guests.map((g, i) => ({
+      key: i, name: g.name, email: g.email,
+      onName: (e) => this.updateGuest(i, 'name', e.target.value),
+      onEmail: (e) => this.updateGuest(i, 'email', e.target.value),
+      onRemove: () => this.removeGuest(i),
+    }));
+    const editing = form.id != null;
+    const applyTitle = S.hostAdd ? 'Add a visit' : (editing ? 'Edit request' : 'Request your stay');
+    const submitLabel = S.hostAdd ? 'Add visit' : (editing ? 'Update & send' : 'Send request');
+
+    // emails
+    this._fromInbox = S.modal === 'inbox' || this._fromInbox;
+    const emailList = S.emails.map(e => ({
+      key: e.id, subject: e.subject, to: e.to, tag: e.tag, tagColor: e.tagColor,
+      time: new Date(e.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+      onOpen: () => { this._fromInbox = true; this.openEmail(e); },
+    }));
+
+    const bf = S.blockForm || { start: '', end: '', reason: '' };
+
+    return {
+      accentColor: accent,
+      // header
+      openInbox: () => this.openInbox(),
+      inboxDotStyle: (isHost && pendingCount > 0) ? 'position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#C98A2B;border:2px solid #FFFDF8;' : 'display:none;',
+      setGuest: () => this.setRole('guest'), setHost: () => this.setRole('host'),
+      guestPillStyle: pill(!isHost), hostPillStyle: pill(isHost),
+      tabs,
+
+      // screen flags
+      showGuestCal: !isHost && tab === 'calendar',
+      showGuestTrips: !isHost && tab === 'trips',
+      showHostOverview: isHost && tab === 'overview',
+      showHostRequests: isHost && tab === 'requests',
+      showHostCal: isHost && tab === 'hcal',
+      showHostBlocks: isHost && tab === 'blocks',
+
+      // calendar
+      weekdays: ['S','M','T','W','T','F','S'],
+      calCells, monthLabel,
+      prevMonth: () => this.prevMonth(), nextMonth: () => this.nextMonth(),
+
+      // selection bar
+      showSelBar: hasSel, selRange, selNights,
+      ctaLabel: isHost ? 'Add dates' : 'Request',
+      clearSel: () => this.clearSel(), startRequest: () => this.startRequest(),
+
+      // guest trips
+      myTrips, hasMyTrips: myTrips.length > 0, noMyTrips: myTrips.length === 0,
+      goCalendar: () => this.setTab('calendar'),
+
+      // host overview
+      todayLabel: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+      hostFirst: (this.props.hostName || 'there').split(' ')[0],
+      hereNow, pendingCount, upcomingCount: upcoming.length,
+      hasPending: pendingCount > 0, goRequests: () => this.setTab('requests'),
+      arrivals, hasArrivals: arrivals.length > 0, noArrivals: arrivals.length === 0,
+      departures, hasDepartures: departures.length > 0, noDepartures: departures.length === 0,
+
+      // host requests
+      requests, hasRequests: requests.length > 0, noRequests: requests.length === 0,
+
+      // blocks
+      blocksList, hasBlocks: blocksList.length > 0, noBlocks: blocksList.length === 0,
+      openBlockForm: () => this.openBlockForm(),
+
+      // apply modal
+      showApply: S.modal === 'apply',
+      applyTitle, submitLabel, form,
+      onName: (e) => this.setForm({ name: e.target.value }),
+      onEmail: (e) => this.setForm({ email: e.target.value }),
+      onArrival: (e) => this.setForm({ arrival: e.target.value }),
+      onDeparture: (e) => this.setForm({ departure: e.target.value }),
+      incPeople: () => this.incPeople(), decPeople: () => this.decPeople(),
+      addGuest: () => this.addGuest(),
+      formGuests, hasFormGuests: formGuests.length > 0, noFormGuests: formGuests.length === 0,
+      formError: !!S.formErrorText, formErrorText: S.formErrorText,
+      showDraftBtn: !S.hostAdd,
+      saveDraft: () => this.saveDraft(), submitForm: () => this.submitForm(),
+
+      // block modal
+      showBlockForm: S.modal === 'block', blockForm: bf,
+      onBlockStart: (e) => this.setBlock({ start: e.target.value }),
+      onBlockEnd: (e) => this.setBlock({ end: e.target.value }),
+      onBlockReason: (e) => this.setBlock({ reason: e.target.value }),
+      blockError: !!S.blockErrorText, blockErrorText: S.blockErrorText,
+      saveBlock: () => this.saveBlock(),
+
+      // inbox / email
+      showInbox: S.modal === 'inbox', emailList, hasEmails: emailList.length > 0, noEmails: emailList.length === 0,
+      showEmail: S.modal === 'email', emailView: S.emailView || { subject: '', to: '', body: '' },
+      closeEmail: () => this.closeEmail(),
+
+      // shared
+      closeModal: () => this.closeModal(), stop: (e) => e.stopPropagation(),
+
+      // toast
+      showToast: !!S.toast, toastText: S.toast ? S.toast.text : '', toastColor: S.toast ? S.toast.color : '#4E7A52',
+      toastTap: () => this.toastTap(),
+    };
+  }
+}
+</script>
+</body>
+</html>
